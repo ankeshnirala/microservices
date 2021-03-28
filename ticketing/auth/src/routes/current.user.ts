@@ -2,8 +2,14 @@ import { Router, Request, Response } from "express";
 
 const router = Router();
 
-router.get("/api/users/currentuser", (req: Request, res: Response) => {
-  res.send("Hi There!!!");
-});
+import { currentUser } from "./../middlewares/current.user";
+
+router.get(
+  "/api/users/currentuser",
+  currentUser,
+  (req: Request, res: Response) => {
+    res.send({ currentUser: req.currentUser || null });
+  }
+);
 
 export { router as currentUserRouter };

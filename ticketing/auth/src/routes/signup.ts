@@ -1,5 +1,11 @@
 import { Router, Request, Response } from "express";
-import { body, validationResult } from "express-validator";
+import { body } from "express-validator";
+import jwt from "jsonwebtoken";
+
+import { User } from "./../models/user";
+
+import { BadRequestError } from "./../errors/bad.reqest.error";
+import { validateRequest } from "./../middlewares/validate.request";
 
 const router = Router();
 
@@ -12,17 +18,32 @@ router.post(
       .isLength({ min: 4, max: 15 })
       .withMessage("Password must be between 4 & 15 characters"),
   ],
-  (req: Request, res: Response) => {
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-      return res.status(400).send(errors.array());
-    }
-
+  validateRequest,
+  async (req: Request, res: Response) => {
     const { email, password } = req.body;
 
-    console.log("Creating a user...");
-    res.send({});
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      throw new BadRequestError("Email already in use");
+    }
+
+    const user = User.build({ email, password });
+    await user.save();
+
+    // generate jwt token
+    const userJwt = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+      },
+      process.env.JWT_KEY!
+    );
+
+    // store it on session object
+    req.session = { jwt: userJwt };
+
+    res.status(200).send(user);
   }
 );
 
