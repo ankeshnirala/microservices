@@ -17,13 +17,13 @@ const start = async () => {
       useUnifiedTopology: true,
       useCreateIndex: true,
     });
-    console.log("Auth - Connected to MongoDB");
+    console.log("TICKETS - Connected to MongoDB");
   } catch (error) {
     console.log("DB Connection Error", error);
   }
 
   app.listen(3000, () => {
-    console.log("AUTH IS STARTED ON PORT 3000!");
+    console.log("TICKETS IS STARTED ON PORT 3000!");
   });
 };
 
